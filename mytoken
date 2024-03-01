@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract Token is ERC20, Ownable {
+
+    event TokensGenerated(address indexed targetAddress, uint256 sentAmount);
+    event TokensDestroyed(address indexed from, uint256 deductedAmount);
+    event TokensTransferred(address indexed sender, address indexed recipient, uint256 sentAmount);
+
+    constructor(address initialOwner) ERC20("Token", "TK") Ownable(initialOwner) {
+        _mint(initialOwner, 1000); 
+    }
+
+    function mintTokens(address targetAddress, uint256 sentAmount) external onlyOwner {
+        _mint(targetAddress, sentAmount);
+        emit TokensGenerated(targetAddress, sentAmount);
+    }
+
+    function burnTokens(uint256 deductedAmount) external {
+        _burn(_msgSender(), deductedAmount);
+        emit TokensDestroyed(_msgSender(), deductedAmount);
+    }
+  
+    function transferTokens(address targetAddress, uint256 sentAmount) public returns (bool) {
+        _transfer(_msgSender(), targetAddress, sentAmount);
+        emit TokensTransferred(_msgSender(), targetAddress, sentAmount);
+        return true;
+    }
+}
